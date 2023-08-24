@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultrag.net.nz/thymeleaf/layout" >
+<link href="../../static/bootstrap/css/bootstrap.min.css"
+      th:href="@{/bootstrap/css/bootstrap.min.css}"  rel="stylesheet" >
+<script src="../../static/bootstrap/js/bootstrap.bundle.min.js"
+        th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+<link href="css/styles.css" th:href="@{/css/styles.css}" rel="stylesheet" />
+
+<body>
+
+<div th:replace="fragments/header::Main_header"></div>
+
+<div class="container">
+
+    <form action="/register" method="post" enctype="application/x-www-form-urlencoded;charset=UTF-8">
+      <div class="d-flex justify-content-center">
+
+
+      <div class=" w-25 align-items-start mt-3 mb-3">
+
+          <div class="mb-3">
+
+              <label for="userName" class="form-label">이름</label>
+            <input type="text" class="form-control" id="userName" name="userName">
+
+          </div>
+
+          <div class="mb-3">
+              <label for="userPw" class="form-label">사용할 비밀번호</label>
+              <input type="password" class="form-control" id="userPw" name="userPw">
+          </div>
+
+
+
+          <div class="mb-3">
+
+              <div class="d-flex justify-content-center">
+                  <div class="col-9">
+                      <label for="userEmail" class="form-label">사용할 이메일</label>
+                      <input type="email" class="form-control" id="userEmail" name="userEmail" aria-describedby="emailHelp">
+                  </div>
+                  <div class="col-3 m-1">
+                      <br>
+                      <button type="button" class="btn btn-secondary btn-sm" id="emailChk">중복 <br> 검사</button>
+                  </div>
+
+              </div>
+
+              <span id="emailChkMsg"></span>
+
+          </div>
+
+          <div class="mb-3">
+
+              <div class="mb-3">
+
+                  <div class="d-flex justify-content-center">
+                      <div class="col-9">
+                          <label for="userNickName" class="form-label">사용할 닉네임</label>
+                          <input type="text" class="form-control" id="userNickName" name="userNickName">
+                      </div>
+                      <div class="col-3 m-1">
+                          <br>
+                          <button type="button" class="btn btn-secondary btn-sm" id="nickNameChk">중복 <br> 검사</button>
+                      </div>
+                  </div>
+
+                  <span id="nickNameChkMsg"></span>
+
+              </div>
+
+
+
+          </div>
+
+          <div class="mb-3">
+            <label for="phone" class="form-label">전화번호</label>
+            <input type="text" class="form-control" id="phone" name="phone">
+          </div>
+
+          <div class="mb-3">
+            <label for="address" class="form-label">주소</label>
+            <input type="text" class="form-control" id="address" name="address">
+          </div>
+
+
+          <button type="submit" id="send" class="btn btn-secondary">회원가입 완료</button>
+        </div>
+
+      </div>
+      <input type="hidden" id="JoinDate" name="JoinDate" >
+      <input type="hidden" id="followcount" name="followcount" value="0">
+      <input type="hidden" id="followingcount" name="followingcount" value="0">
+      <input type="hidden" id="uuid" name="uuid" value="">
+
+
+    </form>
+</div>
+
+
+
+
+<div th:replace="fragments/footer::footer"></div>
+<script
+        src="https://code.jquery.com/jquery-3.7.0.js"
+        integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM="
+        crossorigin="anonymous"></script>
+<script  th:inline="javascript">
+
+
+let emailChk = 0;
+let nickNamechk = 0;
+
+$('#emailChk').click(function(){
+
+  let userEmail = $('#userEmail').val()
+
+   $.ajax({
+            type:"GET",
+            url:"/userEmailChk",
+            dataType : "text",
+            data: {
+                userEmail : userEmail,
+
+            },
+            success:function(data){
+            if(data == 'true'){
+                $('#emailChkMsg').html('사용 가능한 이메일 입니다')
+                emailChk = 1;
+
+            }else{
+                $('#emailChkMsg').html('이미 사용중인 이메일 입니다')
+                emailChk = 0;
+
+            }
+
+            },
+            error : function(){
+                alert('오류')
+            }
+
+    })
+
+
+
+})
+
+$('#nickNameChk').click(function(){
+
+  let userNickName = $('#userNickName').val()
+
+   $.ajax({
+            type:"GET",
+            url:"/userNickNameChk",
+            dataType : "text",
+            data: {
+                userNickName : userNickName,
+
+            },
+            success:function(data){
+            if(data == 'true'){
+                $('#nickNameChkMsg').html('사용 가능한 닉네임 입니다')
+                nickNamechk = 1;
+            }else{
+                $('#nickNameChkMsg').html('이미 사용중인 닉네임 입니다')
+                 nickNamechk = 0;
+            }
+
+            },
+            error : function(){
+                alert('오류')
+            }
+
+    })
+
+
+})
+
+$('#send').click(function(e){
+
+  let userName = $('#userName').val()
+  let userEmail = $('#userEmail').val()
+  let userNickName = $('#userNickName').val()
+  let phone = $('#phone').val()
+  let userPw = $('#userPw').val()
+  let address = $('#address').val()
+
+  let arr = [userName,userEmail,userNickName,phone,userPw,address]
+
+    for(let i = 0; i < arr.length; i++){
+
+        if(arr[i].length == 0){
+
+            if(i == 0){
+                alert('이름을 입력해주세요.')
+            }else if(i ==1 ){
+                alert('이메일을 입력해주세요.')
+            }else if(i == 2){
+                alert('닉네임을 입력해주세요.')
+            }else if(i == 3){
+                alert('전화번호를 입력해주세요.')
+            }else if(i == 4){
+                alert('비밀번호를을 입력해주세요.')
+            }else if(i == 5){
+                 alert('주소를 입력해주세요.')
+            }
+            e.preventDefault()
+            return;
+
+        }
+    }
+
+
+
+
+    if(emailChk == 0){
+        alert('이메일 중복 검사를 해주세요.')
+         e.preventDefault()
+        return
+    }
+
+    if(nickNamechk == 0){
+
+        alert('닉네임 중복 검사를 해주세요')
+         e.preventDefault()
+        return;
+
+    }
+
+    alert('회원가입 되었습니다.')
+
+
+})
+
+
+
+
+        var JoinDate = document.getElementById("JoinDate");
+
+        function clock() {
+            var time = new Date();
+
+            var month = time.getMonth();
+            var date = time.getDate();
+            var day = time.getDay();
+            var week = ['일', '월', '화', '수', '목', '금', '토'];
+
+            var hours = time.getHours();
+            var minutes = time.getMinutes();
+            var seconds = time.getSeconds();
+            JoinDate.value =
+            `${month + 1}월 ${date}일 ${week[day]}요일 ` +
+            `${hours < 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes}` : minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
+        }
+
+        clock();
+        setInterval(clock, 1000); // 1초마다 실행
+
+
+</script>
+
+</body>
+</html>

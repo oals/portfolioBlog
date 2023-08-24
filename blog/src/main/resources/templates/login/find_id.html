@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultrag.net.nz/thymeleaf/layout" >
+<head>
+  <title>login</title>
+
+  <link href="../../static/bootstrap/css/bootstrap.min.css"
+        th:href="@{/bootstrap/css/bootstrap.min.css}"  rel="stylesheet" >
+  <script src="../../static/bootstrap/js/bootstrap.bundle.min.js"
+          th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+  <link href="css/styles.css" th:href="@{/css/styles.css}" rel="stylesheet" />
+</head>
+<body>
+<div th:replace="fragments/header::Main_header"></div>
+
+
+<div class="container mt-5 mb-5 ">
+  <div class="d-flex justify-content-center">
+
+
+    <div class="card w-25">
+      <span class="text-center mt-2"><strong>이메일 찾기</strong></span>
+
+        <div class="m-3 col-12 w-75">
+          <label for="name" class="form-label">이름</label>
+          <input type="email" class="form-control" id="name" name="name" aria-describedby="emailHelp">
+        </div>
+
+      <div class="m-3 col-12 w-75">
+        <label for="nickName" class="form-label">닉네임</label>
+        <input type="email" class="form-control" id="nickName" name="nickName" aria-describedby="emailHelp">
+      </div>
+
+
+        <div class="m-3 col-12 w-75">
+          <label for="phone" class="form-label">전화번호</label>
+          <input type="password" class="form-control" id="phone" name="phone">
+        </div>
+
+      <div class="m-3 col-12 w-75">
+        <span id="findMsg"> </span>
+      </div>
+
+
+        <button type="button"  id = "btn" class="btn btn-secondary m-3">이메일 찾기</button>
+        <div class="d-flex justify-content-start m-3 mt-0">
+          <span> <a  th:href="@{/findPwPage}" class="m-1"> 비밀번호 찾기</a></span>
+        </div>
+    </div>
+  </div>
+
+</div>
+
+
+<div th:replace="fragments/footer::footer"></div>
+
+
+
+<script
+        src="https://code.jquery.com/jquery-3.7.0.js"
+        integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM="
+        crossorigin="anonymous"></script>
+<script th:inline="javascript">
+
+
+
+  $('#btn').click(function(){
+
+    let phone = $('#phone').val()
+  let name = $('#name').val()
+  let nickName = $('#nickName').val()
+
+
+       $.ajax({
+            type:"GET",
+            url:"/findEmail",
+            dataType : 'text',
+            data: {
+                name : name,
+                nickName : nickName,
+                phone : phone
+            },
+            success:function(data){
+
+            if(data.length != 0){
+              let str = "<strong>" + '이메일 : ' + data +"</strong>"
+              $('#findMsg').html(' ')
+              $('#findMsg').html(str)
+            }else{
+             let str = '이메일을 찾을 수 없습니다'
+              $('#findMsg').html(' ')
+              $('#findMsg').html(str)
+
+            }
+
+
+            },
+            error:function(){
+                alert('잠시 후 다시 시도해주세요.')
+            }
+
+  })
+
+  })
+
+
+
+</script>
+
+</body>
+</html>

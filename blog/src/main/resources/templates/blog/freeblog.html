@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultrag.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<link href="../../static/bootstrap/css/bootstrap.min.css"
+      th:href="@{/bootstrap/css/bootstrap.min.css}"  rel="stylesheet" >
+<script src="../../static/bootstrap/js/bootstrap.bundle.min.js"
+        th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+
+<link href="css/styles.css" th:href="@{/css/styles.css}" rel="stylesheet" />
+
+<style>
+
+.hover:hover {
+    text-decoration:underline !important;
+}
+
+</style>
+
+<body>
+
+
+
+<div th:replace="fragments/header::blog_header"></div>
+
+<div class="w-100" th:style="'background-image:url('+ ${blog_setting.BlogSetting.headerImagePath} +'); height:300px; background-size: cover;'">
+
+
+</div>
+
+<div th:style="' background-image:url('+ ${blog_setting.BlogSetting.BodyImagePath} +'); background-size: cover; '">
+
+    <div class="container"  >
+    <div class="d-flex justify-content-center">
+        <div class="col-md-3  mt-3">
+           <div class="align-items-start">
+               <div >
+                   <div class="card col-3" style="width: 18rem;">
+                       <img th:src="${blog_setting.BlogSetting.profileImagePath}" width="200px" height="300px" class="card-img-top" alt="...">
+                       <div class="card-body">
+                           <span >[[${blog_setting.userNickName}]]</span>
+                           <span class="small-text" style="color:gray">([[${blog_setting.userEmail}]])</span>
+                           <br>
+                           <br>
+                           <span>[[${blog_setting.BlogSetting.profileInfo}]]</span>
+
+                           <span class="badge bg-secondary"><a th:href="@{/myBlogSetting(userNickName=${blog_setting.userNickName})}" style="color:white" th:if="${myBlogChk}">edit</a></span>
+                           <br>
+                           <br>
+                           <span class="badge bg-secondary"><a th:href="@{/myBlogWrite(blogNo=${blog_setting.BlogSetting.blogNo},userNickName=${blog_setting.userNickName})}" style="color:white"  th:if="${myBlogChk}">글 쓰기</a></span>
+                       </div>
+               </div>
+               <div>
+                   <div class="d-flex mt-2" style="border-radius:70%">    <!--카테고리 -->
+                       <div class="align-items-start flex-column mb-3">
+                           <div class="card col-3" style="width: 18rem;">
+                               <div class="card-body">
+                                   <span style="color:red" class="m-2 mb-4">카테고리</span>
+
+                                   <ul th:each="categoryVal : ${category}" class="list-group mt-3 mb-2">
+                                       <li class="list-group-item" th:if="${categoryVal.categoryName != '------------------------------'}">
+                                           <a href="#" style="text-decoration:none; color:black" class="hover">
+                                               [[${categoryVal.categoryName}]]
+                                           </a>
+                                           <span>([[${categoryVal.categoryCount}]])</span>
+                                       </li>
+                                       <span style="color:gray; opacity:0.5" class="mt-2 mb-2" th:unless="${categoryVal.categoryName != '------------------------------'}">--------------------------------------</span>
+
+                                   </ul>
+
+
+
+
+                               </div>
+                           </div>
+
+
+                           <div class="card col-3 mt-1" style="width: 18rem;">
+                               <div class="card-body">
+                                   오늘의 방문자 수 : [[${blog_setting.today}]] 명 <br>
+                                   총 방문자 수 : [[${blog_setting.total}]]명
+
+
+
+                               </div>
+                           </div>
+
+                           <th:block sec:authorize="isAuthenticated()">
+                               <div align="right">
+
+                                   <input type="hidden" id ="userNickName" th:value="${#authentication.principal.userNickName}" >
+                               </div>
+                           </th:block>
+
+
+
+
+                       </div>
+
+
+                   </div>
+               </div>
+
+           </div>
+           </div>
+        </div>
+
+        <div class="col-md-9 mt-3" style="margin-left:25px">
+            <div>
+                <ul class="list-group mb-4">
+                    <li class="list-group-item " >인기 글</li>
+                    <div th:each="popular,i : ${popularBoardDTO}" th:if="${{not #strings.isEmpty(responseDTO.data)}}"  >
+                        <div class="list-group-item d-flex justify-content-center" >
+                            <div class="col-3 m-1">
+                                좋아요 수 : [[${popular.like}]]
+                            </div>
+                            <div class="col-7 m-1">
+                                <a href="#" style="text-decoration:none; color:black" class="hover">[[${popular.title}]]</a>
+                            </div>
+                            <div class="col-2 m-1">
+                                [[${popular.writeDate}]]
+                            </div>
+                        </div>
+                    </div>
+                </ul>
+
+                <ul class="list-group" th:unless="${{not #strings.isEmpty(responseDTO.data)}}">
+                    <li class="list-group-item"><br></li>
+                    <li class="list-group-item"><br></li>
+                    <li class="list-group-item"><br></li>
+                    <li class="list-group-item"><br></li>
+                    <li class="list-group-item"><br></li>
+                </ul>
+            </div>
+            <div>
+                <div class="col-12 justify-content-center">
+                    <div th:if="${#strings.isEmpty(responseDTO.data)}">
+                        <div class="text-center mt-5">  <!--글이 없을 때 조건 문  -->
+                            <h5>아직 작성된 글이 없습니다</h5>
+                            <span th:if="${myBlogChk}">문득 스치는 생각이나 기분,일기 등 다양한 이야기로 <br> 나만의 공간을 채워보세요</span>
+                            <br>
+                            <a th:href="@{/myBlogWrite(blogNo=${blog_setting.BlogSetting.blogNo},userNickName=${blog_setting.userNickName})}" th:if="${myBlogChk}">글쓰기</a>
+                        </div>
+                    </div>
+
+
+                    <!--글 영역 -->
+                    <div id="board">
+                    <div  th:if="${not #strings.isEmpty(responseDTO.data)}" th:each="content,i : ${responseDTO.data}" th:style="'background-color:white'">
+                        <div class="w-100 ">  <!--글이 있을 때 -->
+                            <nav class="navbar navbar-expand-lg bg-light">
+                                <input type="hidden" id="articleNo" class="articleNo" th:value="${content.articleNo}">
+                                <input type="hidden" th:id="|categoryName${content.articleNo}|" th:value="${content.category}">
+
+                                <div class="col-3 m-2">
+                                    <span style="font-weight:700" > [[${content.rownum}]]번쨰 글</span>
+                                        <span style="color:gray">([[${content.category}]])</span>
+                                </div>
+                                <div class="col-6">
+                                    [[${content.title}]]
+                                </div>
+                                <div class="col-3 text-center">
+                                    [[${content.writeDate}]]
+                                </div>
+                            </nav>
+                            <hr>
+                        </div>
+
+
+                        <div class="m-4 mb-0" >   <!--반복문 수정 필요 -->
+                            <div th:each="keyword : ${#strings.setSplit(content.content,',')}" class="m-1">
+
+                                <img th:src="${keyword}"  th:if="${#strings.contains(keyword,'/images/')} " class="w-50">
+                                <span  th:unless="${#strings.contains(keyword,'/images/') or #strings.contains(keyword,'<br>')  }">
+                                    [[${keyword}]]
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class=" ">
+                            <nav class="navbar navbar-expand-lg bg-white d-flex justify-content-center">
+
+                                <div class="col-6 m-1 text-end">
+                                    <button type="button" th:class="|boardLikeBtn${content.articleNo} btn btn-light|" id="boardLikeBtn" th:value="${content.articleNo}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-suit-heart" viewBox="0 0 16 16">
+                                            <path d="m8 6.236-.894-1.789c-.222-.443-.607-1.08-1.152-1.595C5.418 2.345 4.776 2 4 2 2.324 2 1 3.326 1 4.92c0 1.211.554 2.066 1.868 3.37.337.334.721.695 1.146 1.093C5.122 10.423 6.5 11.717 8 13.447c1.5-1.73 2.878-3.024 3.986-4.064.425-.398.81-.76 1.146-1.093C14.446 6.986 15 6.131 15 4.92 15 3.326 13.676 2 12 2c-.777 0-1.418.345-1.954.852-.545.515-.93 1.152-1.152 1.595L8 6.236zm.392 8.292a.513.513 0 0 1-.784 0c-1.601-1.902-3.05-3.262-4.243-4.381C1.3 8.208 0 6.989 0 4.92 0 2.755 1.79 1 4 1c1.6 0 2.719 1.05 3.404 2.008.26.365.458.716.596.992a7.55 7.55 0 0 1 .596-.992C9.281 2.049 10.4 1 12 1c2.21 0 4 1.755 4 3.92 0 2.069-1.3 3.288-3.365 5.227-1.193 1.12-2.642 2.48-4.243 4.38z"/>
+                                        </svg> [[${content.boardLike}]]</button>
+                                </div>
+
+                                <div class="col-6 ">
+                                    <div class="col-11 text-end">
+
+                                        <a th:if="${myBlogChk}" th:class="|boardDelBtn${content.articleNo} hover|"
+                                                id="boardDelBtn" th:value="${content.articleNo}"
+                                           style=" text-decoration:none; color:black;">삭제</a>
+
+                                    </div>
+
+                                </div>
+
+                            </nav>
+                        </div>
+
+                        <div class="accordion mb-3" id="accordionPanelsStayOpenExample" >
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button" style="background-color:white; color:black"  th:value="${content.articleNo}" type="button" data-bs-toggle="collapse" th:data-bs-target="|#panelsStayOpen-collapseOne${content.articleNo}|" aria-expanded="true" th:aria-controls="|panelsStayOpen-collapseOne${content.articleNo}|">
+                                        댓글(0)
+                                    </button>
+
+                                </h2>
+                                <div th:id="|panelsStayOpen-collapseOne${content.articleNo}|" class="accordion-collapse collapse ">
+                                    <div class="accordion-body">
+                                        <div>
+                                            <ul class="list-group list-group-flush" th:style="'background-color:white'">
+                                                <div class="form-floating">
+                                                    <textarea class="form-control  mb-2" name="comment"  style="resize: none;" placeholder="Leave a comment here" id="comment"></textarea>
+                                                    <label for="comment">댓글을 작성하려면 로그인을 해주세요.</label>
+                                                    <button type="button" class="mb-2 CommentBtn btn btn-secondary" th:value="${content.articleNo}" >댓글 작성</button>
+                                                </div>
+
+                                                <div th:id="|boardComment${content.articleNo}|" th:value="${content.articleNo}" class="articleNo">   <!-- 댓글 공간-->
+
+
+                                                </div>
+
+
+
+
+
+
+                                                <div class=" " th:id="|Commentpaging${content.articleNo}|"  th:value="${content.articleNo}" >
+                                                            <!--페이징 공간 -->
+
+
+
+                                                </div>
+
+
+
+
+                                            </ul>
+                                        </div>
+
+
+
+
+                                    </div>
+
+
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+
+                    <div id="paging" class="mt-2">
+                        <div class=" "  th:if="${not #strings.isEmpty(responseDTO.data)}" >
+                            <nav aria-label="Page navigation example justify-content-center align-items-center">
+                                <ul class="pagination justify-content-center " >
+                                    <li class="page-item" th:if="${responseDTO.prev}">
+                                        <a class="page-link paging" pageLink="pagelink" th:data-num="${responseDTO.start-1}">Previous</a>
+                                    </li>
+
+                                    <!-- 페이지 번호 표시 -->
+                                    <th:block  th:each="i : ${#numbers.sequence(responseDTO.start,responseDTO.end)}" >
+                                        <li>
+                                            <th:block th:if="${responseDTO.page == i}">
+                                                <a class="page-link active paging"   th:data-num="${i}">[[${i}]]</a>
+                                            </th:block>
+                                            <th:block th:unless="${responseDTO.page == i}">
+                                                <a class="page-link paging " th:data-num="${i}">[[${i}]]</a>
+                                            </th:block>
+                                        </li>
+                                    </th:block>
+                                    <!-- ------- -->
+
+                                    <li class="page-item" th:if="${responseDTO.next}">
+                                        <a class="page-link paging" pageLink="pagelink" th:data-num="${responseDTO.end+1}">Next</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+
+                    </div>
+
+
+
+                </div>  <!-- 글 본문 -->
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</div>
+
+<div th:replace="fragments/footer::footer"></div>
+
+<script
+        src="https://code.jquery.com/jquery-3.7.0.js"
+        integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM="
+        crossorigin="anonymous"></script>
+</body>
+<script th:inline="javascript">
+
+
+
+
+const accordionChk = 1   //닫기 버튼 했을때 if문으로 건너뛰기
+let userNickName = $('#userNickName').val()
+
+
+
+
+  function createChild(comments, padding = 1) {
+                const commentString = [];
+                let str = ''
+                for(let i = 0; i < comments.length; i++) {
+
+                          str = "<div class='d-flex align-items-start flex-column mb-1' style='padding-left :" + (padding * 40)  + "px'>"
+                          + "<div class='col-3 mt-1'>"
+                                + "ㄴ " + "<a href='/Blog?userNickName=" + comments[i].userNickName + "' >"
+                                    + comments[i].userNickName + "님"
+                                + "</a>"
+                            +"</div>"
+
+                            +"<div class='col-6'>"
+                               +  comments[i].comment
+                            if(comments[i].comment != '삭제된 댓글입니다.'){
+                               str += "<button class='badge bg-secondary m-1' data-bs-toggle='collapse'" + "data-bs-target='#collapseOne" + comments[i].commentNo  + "'aria-expanded='true'" +  "aria-controls='collapseOne" + comments[i].commentNo  + "'>답글</button>"
+
+                                if(userNickName == comments[i].userNickName){
+                                 str += "<button class='badge bg-secondary m-1 delComment'  data-value='"+ comments[i].commentNo   + "' >삭제</button>"
+                                    }
+                            }
+
+                            str += "</div>"
+
+                            +"<div class='col-3'>"
+                                + comments[i].writeDate
+                            +"</div>"
+                       + "</div>"
+
+                            +"<div id='collapseOne"+ comments[i].commentNo   + "'class='accordion-collapse collapse' aria-labelledby='headingOne' data-bs-parent='#accordionExample'>"
+                               +"<div class='accordion-body'>"
+                              + "ㄴ <input type='text' class='w-75' style='border-left-width:0;border-right-width:0;border-top-width:0;border-bottom-width:0.5;'>"
+
+
+                              +"<button type='button' class='replyBtn badge bg-secondary m-1' value ='" +  comments[i].commentNo + "'> 작성 </button>"
+
+                                +"</div>"
+
+
+
+                               +"</div>"
+
+                       +"</div>"
+
+                    commentString.push(str);
+
+
+                  if (comments[i].childComment.length > 0) {
+                    commentString.push(createChild(comments[i].childComment, padding + 1));
+                  }
+
+                }
+
+                console.log(commentString)
+                return commentString.join('')
+              }
+
+
+
+
+
+$(document).on('click','.delComment' ,function(e){
+
+    let commentNo = $(e.target)[0].attributes[1].value
+
+    if(confirm('해당 댓글을 삭제하시겠습니까?')){
+    $.ajax({
+
+        type:'DELETE',
+         url : '/deleteComment',
+        dataType : 'text',
+        data : {
+            commentNo : commentNo
+        },
+        success : function(data){
+
+            let target = $(e.target).parent()
+            target.html(' ')
+            target.html('삭제된 댓글입니다.')
+
+            alert('삭제되었습니다')
+        },
+        error : function(){
+            alert('실패')
+        }
+
+
+        })
+
+}
+
+})
+
+
+$(document).on('click','.accordion-button' ,function(e){
+
+
+  var event = e || window.event;
+  var targetElement = event.target || event. srcElement;
+  let documen = $(targetElement).prev().prev()
+
+   let articleNo = targetElement.value
+   let blogNo = [[${blog_setting.BlogSetting.blogNo}]]
+
+
+
+
+
+     $.ajax({
+     type: 'GET',
+     url : '/pagingComment',
+     dataType : 'json',
+     data : {
+            articleNo : articleNo
+     },
+     success : function(data){
+
+    let str = ''
+    if(data != null ){
+
+        for(let i=0; i<data.list.length; i++){
+            str += "<div class='d-flex align-items-start flex-column mb-1'>"
+                      + "<div class='col-3 mt-1'>"
+                            + "<a href='/Blog?userNickName=" + data.list[i].userNickName + "' >"
+                                + data.list[i].userNickName + "님"
+                            + "</a>"
+                        +"</div>"
+
+                        +"<div class='col-6'>"
+                           + data.list[i].comment
+
+                             if(data.list[i].comment != '삭제된 댓글입니다.'){
+                               str += "<button class='badge bg-secondary m-1' data-bs-toggle='collapse'" + "data-bs-target='#collapseOne" + data.list[i].commentNo  + "'aria-expanded='true'" +  "aria-controls='collapseOne" + data.list[i].commentNo  + "'>답글</button>"
+                             if(userNickName == data.list[i].userNickName){
+                              str += "<button class='badge bg-secondary m-1 delComment'  data-value='"+ data.list[i].commentNo   + "' >삭제</button>"
+                                }
+                            }
+
+                        str += "</div>"
+
+                        +"<div class='col-3'>"
+                            + data.list[i].writeDate
+                        +"</div>"
+                   + "</div>"
+
+                   +"<div id='collapseOne"+ data.list[i].commentNo   + "'class='accordion-collapse collapse' aria-labelledby='headingOne' data-bs-parent='#accordionExample'>"
+                       +"<div class='accordion-body'>"
+                          + "ㄴ <input type='text' class='w-75' style='border-left-width:0;border-right-width:0;border-top-width:0;border-bottom-width:0.5;'>"
+                          +"<button type='button' class='replyBtn badge bg-secondary m-1' value ='" + data.list[i].commentNo  + "'> 작성 </button>"
+
+                       +"</div>"
+                   +"</div>"
+
+
+                let childComment =  createChild(data.list[i].childComment)
+                str += childComment
+                str += "<hr>"
+
+              }
+   }
+
+
+    $('#boardComment'+articleNo).html('')
+    $('#boardComment'+articleNo).html(str)
+
+
+
+		let str2 =  "<nav aria-label='Page navigation example justify-content-center align-items-center'>"
+		        +"<ul class='pagination justify-content-center ' >"
+                 if(data.prev == true){
+                    str2 += "<li class='page-item'>"
+                    + "<a class='page-link Commentpaging' pageLink='pagelink' data-num='" + (data.start - 1)  + "'> Previous </a>"
+                    + "</li>"
+                    }
+
+		for(let i=data.start; i<=data.end; i++){
+
+			str2 += "<li>"
+			if(data.page == i ){
+				str2 += "<div class='page-link active Commentpaging'  data-num='" + i +  "'>" +  i + "</div>"
+			}else{
+				str2 += "<a class='page-link  Commentpaging'  data-num='" + i +  "'>" +  i + "</a>"
+			}
+			str2 +="</li>"
+		}
+
+        if(data.next == true){
+			str2 += "<li class='page-item'>"
+					 + "<a class='page-link Commentpaging' pageLink='pagelink' data-num='" + (data.end + 1)  + "'>  Next </a>"
+					+"</li>"
+		}
+		str2 += "</ul>"
+				+"</nav>"
+
+
+           $('#Commentpaging'+articleNo).html('')  //articleNO더하기
+           $('#Commentpaging'+articleNo).html(str2)
+
+
+
+
+     },
+     error : function(error,xhr){
+        alert('오류')
+     }
+
+
+     })
+
+
+
+
+})
+
+ "<div class='px-3'>"   //자식댓글공간
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$(document).on('click','.replyBtn' ,function(e){
+
+     var event = e || window.event;
+    var targetElement = event.target || event. srcElement;
+    let documen = $(targetElement).prev()
+
+
+    let blogNo = [[${blog_setting.BlogSetting.blogNo}]]
+    let comment = $(documen).val()
+    let articleNo = $(targetElement).closest(".articleNo")[0].attributes[1].value
+    let parentCommentNo = targetElement.value
+
+
+
+
+   $.ajax({
+            type:"POST",
+            url:"/CommentInsert",
+            dataType : "json",
+            data: {
+                articleNo : articleNo,
+                comment : comment,
+                blogNo : blogNo,
+                parentCommentNo : parentCommentNo
+            },
+            success:function(data){
+
+    let str = ''
+    if(data != null ){
+
+         for(let i=0; i<data.list.length; i++){
+            str += "<div class='d-flex align-items-start flex-column mb-1'>"
+                      + "<div class='col-3 mt-1'>"
+                            + "<a href='/Blog?userNickName=" + data.list[i].userNickName + "' >"
+                                + data.list[i].userNickName + "님"
+                            + "</a>"
+                        +"</div>"
+
+                        +"<div class='col-6'>"
+                           + data.list[i].comment
+
+                             if(data.list[i].comment != '삭제된 댓글입니다.'){
+                               str += "<button class='badge bg-secondary m-1' data-bs-toggle='collapse'" + "data-bs-target='#collapseOne" + data.list[i].commentNo  + "'aria-expanded='true'" +  "aria-controls='collapseOne" + data.list[i].commentNo  + "'>답글</button>"
+                              if(userNickName == data.list[i].userNickName){
+                                str += "<button class='badge bg-secondary m-1 delComment'  data-value='"+ data.list[i].commentNo   + "' >삭제</button>"
+                                }
+                            }
+
+                        str += "</div>"
+
+                        +"<div class='col-3'>"
+                            + data.list[i].writeDate
+                        +"</div>"
+                   + "</div>"
+
+                   +"<div id='collapseOne"+ data.list[i].commentNo   + "'class='accordion-collapse collapse' aria-labelledby='headingOne' data-bs-parent='#accordionExample'>"
+                       +"<div class='accordion-body'>"
+                          + "ㄴ <input type='text' class='w-75' style='border-left-width:0;border-right-width:0;border-top-width:0;border-bottom-width:0.5;'>"
+                          +"<button type='button' class='replyBtn badge bg-secondary m-1' value ='" + data.list[i].commentNo  + "'> 작성 </button>"
+
+                       +"</div>"
+                   +"</div>"
+
+
+                let childComment =  createChild(data.list[i].childComment)
+                str += childComment
+                str += "<hr>"
+
+
+              }
+   }
+
+
+    $('#boardComment'+articleNo).html('')
+    $('#boardComment'+articleNo).html(str)
+
+
+
+
+
+
+
+            },
+            error:function(error,status){
+            console.log(error)
+            console.log(status)
+
+                alert('로그인을 해주세요.')
+            }
+
+
+    })
+
+
+
+
+})
+
+
+
+
+$(document).on('click','.CommentBtn' ,function(e){
+
+  var event = e || window.event;
+  var targetElement = event.target || event. srcElement;
+  let documen = $(targetElement).prev().prev()
+
+   let articleNo = targetElement.value
+   let comment = $(documen).val()
+   let blogNo = [[${blog_setting.BlogSetting.blogNo}]]
+
+
+
+   $.ajax({
+            type:"POST",
+            url:"/CommentInsert",
+            dataType : "json",
+            data: {
+                articleNo : articleNo,
+                comment : comment,
+                blogNo : blogNo,
+                parentCommentNo : 0
+            },
+            success:function(data){
+
+           $(documen).val(' ')
+
+
+    let str = ''
+    if(data != null ){
+
+        for(let i=0; i<data.list.length; i++){
+            str += "<div class='d-flex align-items-start flex-column mb-1'>"
+                      + "<div class='col-3 mt-1'>"
+                            + "<a href='/Blog?userNickName=" + data.list[i].userNickName + "' >"
+                                + data.list[i].userNickName + "님"
+                            + "</a>"
+                        +"</div>"
+
+                        +"<div class='col-6'>"
+                           + data.list[i].comment
+
+                             if(data.list[i].comment != '삭제된 댓글입니다.'){
+                               str += "<button class='badge bg-secondary m-1' data-bs-toggle='collapse'" + "data-bs-target='#collapseOne" + data.list[i].commentNo  + "'aria-expanded='true'" +  "aria-controls='collapseOne" + data.list[i].commentNo  + "'>답글</button>"
+                              if(userNickName == data.list[i].userNickName){
+                                str += "<button class='badge bg-secondary m-1 delComment'  data-value='"+ data.list[i].commentNo   + "' >삭제</button>"
+                                }
+                            }
+
+                        str += "</div>"
+
+                        +"<div class='col-3'>"
+                            + data.list[i].writeDate
+                        +"</div>"
+                   + "</div>"
+
+                   +"<div id='collapseOne"+ data.list[i].commentNo   + "'class='accordion-collapse collapse' aria-labelledby='headingOne' data-bs-parent='#accordionExample'>"
+                       +"<div class='accordion-body'>"
+                          + "ㄴ <input type='text' class='w-75' style='border-left-width:0;border-right-width:0;border-top-width:0;border-bottom-width:0.5;'>"
+                          +"<button type='button' class='replyBtn badge bg-secondary m-1' value ='" + data.list[i].commentNo  + "'> 작성 </button>"
+
+                       +"</div>"
+                   +"</div>"
+
+
+                let childComment =  createChild(data.list[i].childComment)
+                str += childComment
+                str += "<hr>"
+
+              }
+   }
+
+
+    $('#boardComment'+articleNo).html('')
+    $('#boardComment'+articleNo).html(str)
+
+
+
+
+
+
+
+            },
+            error:function(error,status){
+            console.log(error)
+            console.log(status)
+
+                alert('로그인을 해주세요.')
+            }
+
+
+    })
+
+})
+
+
+
+
+$(document).on('click','.paging' ,function(e){
+
+            const target = e.target;
+            const page = target.getAttribute("data-num")
+            let blogNo = [[${blog_setting.BlogSetting.blogNo}]]
+
+        $.ajax({
+            type:"GET",
+            url:"/pagingBoard",
+            dataType : 'json',
+            data: {
+                blogNo : blogNo,
+                page : page
+            },
+            success:function(data){
+             let str2 = ''
+
+                    for(let i =0; i< data.data.content.length; i++){
+
+                    str2 +="<div style='background-color:white'>"
+                        +"<div class='w-100 '>"  +"<!--글이 있을 때 -->"
+                            +"<nav class='navbar navbar-expand-lg bg-light'>"
+                                +"<input type='hidden' id='articleNo' class='articleNo' value='"+ data.data.content[i].articleNo +"'>"
+                                +"<input type='hidden' id='categoryName" +  data.data.content[i].articleNo + "'value='" + data.data.content[i].category +"'>"
+
+                                +"<div class='col-3 m-2'>"
+                                    +"<span style='font-weight:700' class='my-1'>" + data.data.content[i].rownum + "번쨰 글" +"</span>"
+                                    + "<span style='color:gray'>(" + data.data.content[i].category + ")</span>"
+                                +"</div>"
+                                +"<div class='col-6'>"
+                                    +data.data.content[i].title
+                                +"</div>"
+                                +"<div class='col-3 text-center'>"
+                                    + data.data.content[i].writeDate
+                                +"</div>"
+                            +"</nav>"
+                            +"<hr>"
+                        +"</div>"
+
+                        + "<div class='m-4 mb-0'>"
+                            let arr = data.data.content[i].content.split(",")
+                            console.log(arr)
+                            +"<div class='m-1'>"
+                            for(let i = 0; i< arr.length; i++){
+                                if(arr[i].indexOf('/images/') != -1){  <!--포함되어 있으면 -->
+
+                                str2 += "<img src='" + arr[i]  +"' class='w-50'>"
+                                    + "<br>"
+                                }else{
+
+                                    if(arr[i].indexOf('<br>') == -1){
+                                     str2 += "<span>"
+                                        + arr[i]
+                                        +"</span>"
+                                        + "<br>"
+                                    }
+                                }
+                            }
+
+                           str2 += "</div>"
+                        +"</div>"
+
+                        +"<div class=' '>"
+                            +"<nav class='navbar navbar-expand-lg bg-white d-flex justify-content-center'>"
+                                +"<div class='col-6 m-1 text-end'>"
+                                    +"<button type='button' class='boardLikeBtn" + data.data.content[i].articleNo + " " + "btn btn-light' id='boardLikeBtn' value='" + data.data.content[i].articleNo + "'>"
+                                        +"<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-suit-heart' viewBox='0 0 16 16'>"
+                                            +"<path d='m8 6.236-.894-1.789c-.222-.443-.607-1.08-1.152-1.595C5.418 2.345 4.776 2 4 2 2.324 2 1 3.326 1 4.92c0 1.211.554 2.066 1.868 3.37.337.334.721.695 1.146 1.093C5.122 10.423 6.5 11.717 8 13.447c1.5-1.73 2.878-3.024 3.986-4.064.425-.398.81-.76 1.146-1.093C14.446 6.986 15 6.131 15 4.92 15 3.326 13.676 2 12 2c-.777 0-1.418.345-1.954.852-.545.515-.93 1.152-1.152 1.595L8 6.236zm.392 8.292a.513.513 0 0 1-.784 0c-1.601-1.902-3.05-3.262-4.243-4.381C1.3 8.208 0 6.989 0 4.92 0 2.755 1.79 1 4 1c1.6 0 2.719 1.05 3.404 2.008.26.365.458.716.596.992a7.55 7.55 0 0 1 .596-.992C9.281 2.049 10.4 1 12 1c2.21 0 4 1.755 4 3.92 0 2.069-1.3 3.288-3.365 5.227-1.193 1.12-2.642 2.48-4.243 4.38z'/>"
+                                        +"</svg>" + " " + data.data.content[i].boardLike + "</button>"
+                                +"</div>"
+
+                                +"<div class='col-6 '>"
+                                    +"<div class='col-11 text-end'>"
+                                        if([[${myBlogChk}]] != false ){
+                                        str2 += "<a  style='text-decoration:none;color:black;' class='hover boardDelBtn" + data.data.content[i].articleNo + "'"
+                                               str2 += "id='boardDelBtn' value='" + data.data.content[i].articleNo + "'>" + "삭제" + "</a>"
+                                    }
+                                    str2 += "</div>"
+                                +"</div>"
+                            +"</nav>"
+                        +"</div>"
+
+                        +"<div class='accordion mb-3' id='accordionPanelsStayOpenExample'>"
+                            +"<div class='accordion-item'>"
+                                +"<h2 class='accordion-header'>"
+                                    +"<button  style='background-color:white; color:black' class='accordion-button' value='" + data.data.content[i].articleNo + "' type='button' data-bs-toggle='collapse' data-bs-target='#panelsStayOpen-collapseOne" + data.data.content[i].articleNo  + "' aria-expanded='true' aria-controls='panelsStayOpen-collapseOne" + data.data.content[i].articleNo + "'>"
+                                        + "댓글(0)"
+                                    +"</button>"
+
+                                +"</h2>"
+
+
+                                +"<div id='panelsStayOpen-collapseOne" + data.data.content[i].articleNo + "' class='accordion-collapse collapse '>"
+                                    +"<div class='accordion-body'>"
+                                        +"<div>"
+                                            +"<ul class='list-group list-group-flush' style=''background-color:white''>"
+                                                +"<div class='form-floating'>"
+                                                    +"<textarea class='form-control  mb-2' name='comment'  style='resize: none;' placeholder='Leave a comment here' id='comment'> </textarea>"
+                                                    +"<label for='comment'>" + "댓글을 작성하려면 로그인을 해주세요." +"</label>"
+                                                    +"<button type='button' class='mb-2 CommentBtn btn btn-secondary' value='" + data.data.content[i].articleNo + "' >" + "댓글 작성" + "</button>"
+                                                +"</div>"
+
+                                                +"<div id='boardComment" + data.data.content[i].articleNo + "' value='" + data.data.content[i].articleNo +"' class='articleNo'>"
+
+
+                                                +"</div>"
+
+                                                +"<div class=' ' id='Commentpaging" + data.data.content[i].articleNo +"' value='" + data.data.content[i].articleNo + "' >"
+
+
+                                                +"</div>"
+
+                                            +"</ul>"
+                                        +"</div>"
+
+                                    +"</div>"
+
+                                +"</div>"
+                                +"</div>"
+                            +"</div>"
+                        +"</div>"
+
+
+                }
+
+
+
+
+
+            $('#board').html(' ')
+            $('#board').html(str2)
+
+
+
+		let str =  "<nav aria-label='Page navigation example justify-content-center align-items-center'>"
+		        +"<ul class='pagination justify-content-center ' >"
+                 if(data.prev == true){
+                    str += "<li class='page-item'>"
+                    + "<a class='page-link paging' pageLink='pagelink' data-num='" + (data.start - 1)  + "'> Previous </a>"
+                    + "</li>"
+                    }
+
+		for(let i=data.start; i<=data.end; i++){
+
+			str += "<li>"
+			if(data.page == i ){
+				str += "<div class='page-link active paging'  data-num='" + i +  "'>" +  i + "</div>"
+			}else{
+				str += "<a class='page-link  paging'  data-num='" + i +  "'>" +  i + "</a>"
+			}
+			str +="</li>"
+		}
+
+        if(data.next == true){
+			str += "<li class='page-item'>"
+					 + "<a class='page-link paging' pageLink='pagelink' data-num='" + (data.end + 1)  + "'>  Next </a>"
+					+"</li>"
+		}
+		str += "</ul>"
+				+"</nav>"
+
+				console.log(str)
+
+           $('#paging').html(' ')
+           $('#paging').html(str)
+
+
+
+            },
+            error: function(){
+            alert('실패')
+            }
+
+        })
+})
+
+
+
+
+
+$(document).on('click','.Commentpaging' ,function(e){
+
+            const target = e.target;
+            let documen = $(target).parent().parent().parent().parent()
+
+            const page = target.getAttribute("data-num")
+            let articleNo = documen[0].id.substr(13)
+
+
+
+        $.ajax({
+            type:"GET",
+            url:"/pagingComment",
+            dataType : 'json',
+            data: {
+                articleNo : articleNo,
+                page : page
+            },
+            success:function(data){
+
+             let str = ''
+
+    if(data != null ){
+
+         for(let i=0; i<data.list.length; i++){
+            str += "<div class='d-flex align-items-start flex-column mb-1'>"
+                      + "<div class='col-3 mt-1'>"
+                            + "<a href='/Blog?userNickName=" + data.list[i].userNickName + "' >"
+                                + data.list[i].userNickName + "님"
+                            + "</a>"
+                        +"</div>"
+
+                        +"<div class='col-6'>"
+                           + data.list[i].comment
+
+                             if(data.list[i].comment != '삭제된 댓글입니다.'){
+                               str += "<button class='badge bg-secondary m-1' data-bs-toggle='collapse'" + "data-bs-target='#collapseOne" + data.list[i].commentNo  + "'aria-expanded='true'" +  "aria-controls='collapseOne" + data.list[i].commentNo  + "'>답글</button>"
+                              if(userNickName == data.list[i].userNickName){
+                                str += "<button class='badge bg-secondary m-1 delComment'  data-value='"+ data.list[i].commentNo   + "' >삭제</button>"
+                                }
+                            }
+
+                        str += "</div>"
+
+                        +"<div class='col-3'>"
+                            + data.list[i].writeDate
+                        +"</div>"
+                   + "</div>"
+
+                   +"<div id='collapseOne"+ data.list[i].commentNo   + "'class='accordion-collapse collapse' aria-labelledby='headingOne' data-bs-parent='#accordionExample'>"
+                       +"<div class='accordion-body'>"
+                          + "ㄴ <input type='text' class='w-75' style='border-left-width:0;border-right-width:0;border-top-width:0;border-bottom-width:0.5;'>"
+                          +"<button type='button' class='replyBtn badge bg-secondary m-1' value ='" + data.list[i].commentNo  + "'> 작성 </button>"
+
+                       +"</div>"
+                   +"</div>"
+
+
+                let childComment =  createChild(data.list[i].childComment)
+                str += childComment
+                str += "<hr>"
+
+              }
+   }
+
+
+    $('#boardComment'+articleNo).html('')
+    $('#boardComment'+articleNo).html(str)
+
+
+
+		let str2 =  "<nav aria-label='Page navigation example justify-content-center align-items-center'>"
+		        +"<ul class='pagination justify-content-center ' >"
+                 if(data.prev == true){
+                    str2 += "<li class='page-item'>"
+                    + "<a class='page-link Commentpaging' pageLink='pagelink' data-num='" + (data.start - 1)  + "'> Previous </a>"
+                    + "</li>"
+                    }
+
+		for(let i=data.start; i<=data.end; i++){
+
+			str2 += "<li>"
+			if(data.page == i ){
+				str2 += "<div class='page-link active Commentpaging'  data-num='" + i +  "'>" +  i + "</div>"
+			}else{
+				str2 += "<a class='page-link  Commentpaging'  data-num='" + i +  "'>" +  i + "</a>"
+			}
+			str2 +="</li>"
+		}
+
+        if(data.next == true){
+			str2 += "<li class='page-item'>"
+					 + "<a class='page-link Commentpaging' pageLink='pagelink' data-num='" + (data.end + 1)  + "'>  Next </a>"
+					+"</li>"
+		}
+		str2 += "</ul>"
+				+"</nav>"
+
+
+           $('#Commentpaging'+articleNo).html('')
+           $('#Commentpaging'+articleNo).html(str2)
+
+            },
+            error: function(){
+            alert('실패')
+            }
+
+        })
+})
+
+
+
+
+
+
+$(document).on('click','#boardDelBtn' ,function(e){
+
+    console.log(e)
+    let target = e.target
+    let articleNo = e.target.attributes[2].value
+    let blogNo = [[${blog_setting.BlogSetting.blogNo}]]
+    let categoryName = $('#categoryName'+articleNo).val()
+
+    let chk = confirm('삭제하시겠습니까?')
+    if(chk == true){
+    $.ajax({
+        type: 'DELETE',
+        url : "/BoardDelete",
+        dataType : 'text',
+        data: {
+               articleNo : articleNo,
+               blogNo : blogNo,
+               categoryName : categoryName
+         },
+         success:function(data){
+                alert('성공');
+                location.reload()
+         },
+         error : function(error){
+            alert('실패')
+         }
+
+        })
+
+    }
+})
+
+
+
+
+$(document).on('click','#boardLikeBtn' ,function(e){
+
+
+    let target = e.target
+     let articleNo = ' '
+    if(e.target.attributes[0].name=='xmlns'){
+        articleNo = $(target).parent().val()
+    }else{
+        articleNo = $(target).val()
+    }
+
+
+    $.ajax({
+        type: 'POST',
+        url : "/BoardLikePlus",
+        dataType : 'text',
+        data: {
+               articleNo : articleNo
+         },
+         success:function(data){
+
+                let str =  "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-suit-heart' viewBox='0 0 16 16'>"
+                                            + "<path d='m8 6.236-.894-1.789c-.222-.443-.607-1.08-1.152-1.595C5.418 2.345 4.776 2 4 2 2.324 2 1 3.326 1 4.92c0 1.211.554 2.066 1.868 3.37.337.334.721.695 1.146 1.093C5.122 10.423 6.5 11.717 8 13.447c1.5-1.73 2.878-3.024 3.986-4.064.425-.398.81-.76 1.146-1.093C14.446 6.986 15 6.131 15 4.92 15 3.326 13.676 2 12 2c-.777 0-1.418.345-1.954.852-.545.515-.93 1.152-1.152 1.595L8 6.236zm.392 8.292a.513.513 0 0 1-.784 0c-1.601-1.902-3.05-3.262-4.243-4.381C1.3 8.208 0 6.989 0 4.92 0 2.755 1.79 1 4 1c1.6 0 2.719 1.05 3.404 2.008.26.365.458.716.596.992a7.55 7.55 0 0 1 .596-.992C9.281 2.049 10.4 1 12 1c2.21 0 4 1.755 4 3.92 0 2.069-1.3 3.288-3.365 5.227-1.193 1.12-2.642 2.48-4.243 4.38z'/>"
+                                        + "</svg>" + " " + data
+                $('.boardLikeBtn'+articleNo).text(' ')
+               $('.boardLikeBtn'+articleNo).html(str)
+
+
+
+
+         },
+         error : function(error){
+            alert(error)
+         }
+
+        })
+
+})
+
+
+
+
+
+
+</script>
+</html>

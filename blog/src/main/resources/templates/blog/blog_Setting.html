@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultrag.net.nz/thymeleaf/layout" >
+<link href="../../static/bootstrap/css/bootstrap.min.css"
+      th:href="@{/bootstrap/css/bootstrap.min.css}"  rel="stylesheet" >
+<script src="../../static/bootstrap/js/bootstrap.bundle.min.js"
+        th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+<link href="css/styles.css" th:href="@{/css/styles.css}" rel="stylesheet" />
+
+<body>
+
+
+<div th:replace="fragments/header::blog_header"></div>
+
+
+
+
+<form action="/myBlogSetting" method="post" enctype="multipart/form-data">
+    <input type="hidden" th:value="${blog_setting.BlogSetting.blogNo}" name="blogNo" id="blogNo">
+    <!--블로그 설정 -->
+    <div class="container mt-5" id="blogSet" >
+
+        <div class="d-flex">   <!--프로필 -->
+                <div class="w-100 m-3">
+                    <h3 class="text-start">블로그 설정</h3>
+                        <hr class="mb-3">
+                        <div class="mb-4 mt-4">
+                            <div class="d-flex justify-content-center">
+                                <div class="col-6 m-1">
+                                    <label for="usernickName" class="form-label">닉네임</label>
+                                    <input type="text" readonly class="form-control" th:value="${blog_setting.userNickName}" name="userNickName"  id="usernickName">
+                                </div>
+                                <div class="col-6 m-1">
+                                    <label for="joindate" class="form-label">가입날짜 </label>
+                                    <input type="text" class="form-control" th:value="${blog_setting.joinDate}" name="joindate"  id="joinDate" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="mb-4 mt-4">
+                            <label for="profileinfo" class="form-label">프로필 소개</label>
+                            <textarea type="text" class="form-control" style="resize:none" name="profileInfo" id="profileinfo">[[${blog_setting.BlogSetting.profileInfo}]]</textarea>
+                        </div>
+                        <hr>
+
+                        <div class="row mb-4 mt-4">
+                            <div class="col">
+                                <select  class="form-select" id="privateChk" name="privateChk" >
+                                    <option value="true" th:selected="${blog_setting.BlogSetting.privateChk ==true}">블로그 공개</option>
+                                    <option value="false" th:selected="${blog_setting.BlogSetting.privateChk ==false}">블로그 비공개</option>
+                                </select>
+                            </div>
+
+                            <div class="col">
+                                <select  class="form-select" id="blogTopic" name="blogTopic">
+                                    <option value="기본값">블로그 주제</option>
+                                    <option value="daily" th:selected="${blog_setting.BlogSetting.blogTopic =='daily'}">일상</option>
+                                    <option value="programming" th:selected="${blog_setting.BlogSetting.blogTopic =='programming'}">프로그래밍</option>
+                                    <option value="travel" th:selected="${blog_setting.BlogSetting.blogTopic =='travel'}">여행</option>
+                                </select>
+                            </div>
+                        </div>
+                        <hr>
+                    </div>
+                </div> <!--프로필 / 최근 글 5개 리스트 -->
+
+
+
+                <div class="col-12 justify-content-center ms-3">
+
+                    <span class="m-2 mb-3">카테고리</span>
+
+
+                    <div class="d-flex justify-content-center ">
+                            <div class="col-7">
+                                <ul id="CategoryList" class="list-group">
+                                    <li th:each="categoryVal : ${category}" class="" style="list-style-type:none">
+                                        <div class="d-flex justify-content-center">
+                                            <input type="text" th:value="${categoryVal.categoryName}" class="form-control w-100 parentCategory"  name="parentCategory">
+                                            <button type="button" class="btn-close btn-sm m-3" aria-label="Close" id="delCategory">  </button>
+                                        </div>
+
+                                        <input type="hidden" th:value="${categoryVal.categoryCount}"  name="parentCategory">
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-5">
+                                <div class="card">
+                                        <button type="button" class="btn btn btn-outline-secondary m-1 " id="plusCategory"> 추가 </button>
+                                        <button type="button" class="btn btn-outline-secondary m-1" id="plusLine"> 구분선 추가 </button>
+                                        <button type="button" class="btn btn-outline-secondary m-1"  id="resetCatogory">초기화 </button>
+                                </div>
+                                <span class="m-2" style="color:gray">
+                                    카테고리의 최소 개수는 1개 입니다.
+                                </span>
+
+                            </div>
+
+                    </div>
+
+
+
+                    <hr class="mt-5 mb-5">
+                    <!--헤더 이미지 바디 이미지 변경하는 곳 -->
+
+                    <div class="d-flex col-12 mt-3 ms-2">
+
+                        <div class="col-3 card">
+                            <span class="text-center">헤더 이미지</span>
+                                <div class="card-body align-items-start">
+                                    <div>
+                                        <img th:src="${blog_setting.BlogSetting.headerImagePath}" class="card-img-top w-100" alt="...">
+                                    </div>
+                                    <hr>
+                                    <div>
+                                        <input type="file" id="headerImagePath" name="headerImagePath" th:value="${blog_setting.BlogSetting.headerImagePath}">
+                                    </div>
+                                </div>
+                        </div>
+
+
+
+
+                        <div class="col-3 card ms-5">
+                            <span class="text-center">바디 이미지</span>
+                            <div class="card-body align-items-start">
+                                <div>
+                                    <img th:src="${blog_setting.BlogSetting.bodyImagePath}" class="card-img-top" alt="...">
+                                </div>
+                                <hr>
+                                <div>
+                                    <input type="file" id="bodyImagePath" name="bodyImagePath" th:value="${blog_setting.BlogSetting.bodyImagePath}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-3 card ms-5">
+                            <span class="text-center">프로필 이미지</span>
+                            <div class="card-body align-items-start">
+                                <div>
+                                    <img th:src="${blog_setting.BlogSetting.profileImagePath}" class="card-img-top" alt="...">
+                                </div>
+                                <hr>
+                                <div>
+                                    <input type="file" id="profileImagePath" name="profileImagePath" th:value="${blog_setting.BlogSetting.profileImagePath}">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <hr>
+
+                    <div class="d-flex justify-content-center mb-5">
+                        <button type="submit" id="send"
+                                class="btn btn-outline-secondary">설정 저장</button>
+                    </div>
+
+                </div>  <!-- 글 본문 -->
+    </div>
+
+
+</form>
+
+
+
+
+<script
+        src="https://code.jquery.com/jquery-3.7.0.js"
+        integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM="
+        crossorigin="anonymous"></script>
+<script th:inline="javascript">
+
+
+
+$('#send').click(function(e){
+
+  var form = document.getElementById("form");
+
+    let str = []
+    str = $('.parentCategory')
+
+
+    for(let i =0; i <str.length; i++){
+        let chk = $(str[i]).val()
+
+
+        for(let j = 0; j < str.length; j++){
+
+            if(i == j){
+                continue;
+            }
+
+            if(chk == $(str[j]).val()){
+                if(chk.indexOf('---') != -1){
+
+                }else{
+                    alert('카테고리명은 중복 될 수 없습니다.')
+                    e.preventDefault()
+                    return;
+                }
+
+            }
+
+        }
+
+
+    }
+
+
+})
+
+
+
+
+    $('#plusCategory').click(function(){
+
+    if($('ul li').length > 14){
+            alert('카테고리가 너무 많습니다.')
+            return ;
+        }
+
+
+        let str = "<li class='' style='list-style-type:none'>"
+                                        + "<div class='d-flex justify-content-center'>"
+                                            + "<input type='text' value='카테고리명" + ($('ul li').length + 1) + "' class='form-control w-100 parentCategory'  name='parentCategory'>"
+                                            + "<button type='button' class='btn-close btn-sm m-3' aria-label='Close' id='delCategory'>"
+                                            + "</button>"
+                                        + "</div>"
+
+                                         + "<input type='hidden' value='0'  name='parentCategory'>"
+                                    + "</li>"
+
+        $('#CategoryList').append(str)
+
+
+
+
+
+
+
+
+
+        console.log($('ul li').length )
+
+
+
+    })
+
+
+
+    $('#plusLine').click(function(){
+
+     let str = "<li class='' style='list-style-type:none'>"
+                                        + "<div class='d-flex justify-content-center'>"
+                                            + "<input type='text' readonly value='------------------------------' class='form-control w-100 parentCategory'  name='parentCategory'>"
+                                            + "<button type='button' class='btn-close btn-sm m-3' aria-label='Close' id='delCategory'>"
+                                            + "</button>"
+                                        + "</div>"
+
+                                        + "<input type='hidden' value='0'  name='parentCategory'>"
+                                    + "</li>"
+
+
+
+
+         $('#CategoryList').append(str)
+
+
+
+
+
+
+    })
+
+
+    $('#resetCatogory').click(function(){
+        let delChk = confirm('카테고리를 초기화 하시겠습니까?')
+        if(delChk){
+                            let str = "<li class='' style='list-style-type:none'>"
+                                        + "<div class='d-flex justify-content-center'>"
+                                            + "<input type='text' value='카테고리명' class='form-control w-100 parentCategory'  name='parentCategory'>"
+                                            + "<button type='button' class='btn-close btn-sm m-3' aria-label='Close' id='delCategory'>"
+                                            + "</button>"
+                                        + "</div>"
+
+                                        + "<input type='hidden' value='0'  name='parentCategory'>"
+                                    + "</li>"
+
+
+            $('#CategoryList').empty()
+            $('#CategoryList').html(str)
+
+
+        }
+    })
+
+
+    $(document).on('click','#delCategory',function(e){
+
+
+        if($('ul li').length == 1){
+            alert('최소 1개의 카테고리는 필요합니다.')
+            return ;
+        }
+
+       var li =  $(this).parent().parent()
+       li.remove()
+    })
+
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>
