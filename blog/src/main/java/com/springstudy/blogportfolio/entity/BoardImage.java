@@ -11,7 +11,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BoardImage { //사용안됨
+public class BoardImage { 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
