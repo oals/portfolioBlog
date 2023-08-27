@@ -61,14 +61,6 @@ public class RegisterController {
         blogSettingService.create_category(blogSettingDTO);
 
 
-
-
-        //블로그 글 이미지 저장소 생성
-
-
-        //팔로우 팔로잉 테이블 생성  -> 팔로우 팔로잉은 생성 x
-
-
         //프로필 이미지 등 저장할 회원 폴더 생성
         createDirectoryService.createBlogDirectory(blogSettingDTO.getBlogNo());
 
@@ -76,14 +68,6 @@ public class RegisterController {
 
         //프로필 이미지 등 업데이트 전 이미지 테이블 생성
         blogSettingService.create_Image(blogSettingDTO);
-
-
-
-
-        //블로그 글의 이미지 회원 폴더 생성
-
-
-
 
 
         //컨트롤러 -> 컨트롤러 이동 코드

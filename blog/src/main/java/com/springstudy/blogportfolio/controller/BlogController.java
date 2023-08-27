@@ -124,7 +124,6 @@ public class BlogController {
     @PreAuthorize("principal.userNickName == #userNickName")
     @GetMapping(value="/myBlogWrite")           //글쓰기 페이지 보여주기
     public String myBlogWrite(Long blogNo,String userNickName,Model model){
-    log.info("텟으트 : "+userNickName);
 
         //해당 블로그가 가지고 있는 카테고리 가지고 가기
         CategoryDTO categoryDTO = blogSettingService.GetBlog_Category(blogNo);
@@ -211,11 +210,6 @@ public class BlogController {
         }
 
 
-
-
-
-
-
         //content내용 알고리즘 생성 / img 문자열 -> 이미지 경로
         BlogSettingDTO blogSettingDTO = blogSettingService.GetBlog_SettingEntity(blogNo);
 
@@ -258,8 +252,6 @@ public class BlogController {
     public String myBlogSetting(String userNickName,Model model,Principal principal){
 
 
-
-
         RequestBlogSettingDTO blog_setting = blogSettingService.GetBlog_Setting(userNickName);;
 
 
@@ -279,29 +271,23 @@ public class BlogController {
     @PostMapping(value="/myBlogSetting")
     public ModelAndView UpdateMyBlogSetting(@Valid @RequestParam("headerImagePath") MultipartFile headerImagePath,
                                       @Valid @RequestParam("bodyImagePath") MultipartFile bodyImagePath,
-                                      @Valid @RequestParam("profileImagePath") MultipartFile profileImagePath
-            ,Long blogNo
-            ,String userNickName,String profileInfo,
-            boolean privateChk,String blogTopic,
-            @Param("parentCategory") String[] parentCategory
+                                      @Valid @RequestParam("profileImagePath") MultipartFile profileImagePath,
+                                            ResponseBlogSettingDTO responseBlogSettingDTO  )throws Exception{
 
-    )throws Exception{
 
         Map<String,String> ImageMap = new HashMap<>();
 
+        Long blogNo = responseBlogSettingDTO.getBlogNo();
 
         //닉네임 업데이트  -> 동일 닉네임 검사 필요 -> 타임리프에서 ajax로 중복검사 ->
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserDetails userDetails = (UserDetails) principal;
-        user_info_service.Update_UserNickName(((UserDetails) principal).getUsername(),userNickName);
-
+        user_info_service.Update_UserNickName(((UserDetails) principal).getUsername(),responseBlogSettingDTO.getUserNickName());
 
         blogSettingService.delete_Category(blogNo);
 
         //카테고리 추가, 수정, 삭제
-        blogSettingService.update_Category(blogNo,parentCategory);
-
-
+        blogSettingService.update_Category(blogNo,responseBlogSettingDTO.getParentCategory());
 
 
         //블로그 정보 업데이트
@@ -334,9 +320,9 @@ public class BlogController {
 
         BlogSettingDTO blogSettingDTO = BlogSettingDTO.builder()
                 .blogNo(blogNo)
-                .profileInfo(profileInfo)
-                .privateChk(privateChk)
-                .blogTopic(blogTopic)
+                .profileInfo(responseBlogSettingDTO.getProfileInfo())
+                .privateChk(responseBlogSettingDTO.isPrivateChk())
+                .blogTopic(responseBlogSettingDTO.getBlogTopic())
                 .headerImagePath(ImageMap.get("headerImagePath") == null ? blogSettingImageDTO.getPastHeaderImagePath() : ImageMap.get("headerImagePath"))
                 .bodyImagePath(ImageMap.get("bodyImagePath") == null ? blogSettingImageDTO.getPastBodyImagePath() : ImageMap.get("bodyImagePath"))
                 .profileImagepath(ImageMap.get("profileImagePath") == null ? blogSettingImageDTO.getPastProfileImagePath() : ImageMap.get("profileImagePath"))
@@ -377,7 +363,7 @@ public class BlogController {
         //컨트롤러 -> 컨트롤러 이동 코드
         ModelAndView MAV = new ModelAndView();
         MAV.setViewName("redirect:/Blog");
-        MAV.addObject("userNickName",userNickName);
+        MAV.addObject("userNickName",responseBlogSettingDTO.getUserNickName());
 
         return MAV;
 

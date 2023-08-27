@@ -384,6 +384,9 @@ $(document).on('click','.delComment' ,function(e){
 
     let commentNo = $(e.target)[0].attributes[1].value
 
+
+    console.log( $(e.target))
+
     if(confirm('해당 댓글을 삭제하시겠습니까?')){
     $.ajax({
 
@@ -560,10 +563,11 @@ $(document).on('click','.replyBtn' ,function(e){
 
     let blogNo = [[${blog_setting.BlogSetting.blogNo}]]
     let comment = $(documen).val()
-    let articleNo = $(targetElement).closest(".articleNo")[0].attributes[1].value
+    let articleNo = $(targetElement).closest(".articleNo")[0].attributes.value.value
     let parentCommentNo = targetElement.value
 
-
+    console.log($(targetElement).closest(".articleNo"))
+    console.log(articleNo)
 
 
    $.ajax({
@@ -764,6 +768,8 @@ $(document).on('click','.paging' ,function(e){
                 page : page
             },
             success:function(data){
+            console.log(data)
+            let count = 3
              let str2 = ''
 
                     for(let i =0; i< data.data.content.length; i++){
@@ -775,7 +781,7 @@ $(document).on('click','.paging' ,function(e){
                                 +"<input type='hidden' id='categoryName" +  data.data.content[i].articleNo + "'value='" + data.data.content[i].category +"'>"
 
                                 +"<div class='col-3 m-2'>"
-                                    +"<span style='font-weight:700' class='my-1'>" + data.data.content[i].rownum + "번쨰 글" +"</span>"
+                                    +"<span style='font-weight:700' class='my-1'>" + (data.total - data.page - i )  + "번쨰 글" +"</span>"
                                     + "<span style='color:gray'>(" + data.data.content[i].category + ")</span>"
                                 +"</div>"
                                 +"<div class='col-6'>"
@@ -1048,9 +1054,11 @@ $(document).on('click','#boardDelBtn' ,function(e){
 
     console.log(e)
     let target = e.target
-    let articleNo = e.target.attributes[2].value
+    let articleNo = e.target.attributes.value.value
     let blogNo = [[${blog_setting.BlogSetting.blogNo}]]
     let categoryName = $('#categoryName'+articleNo).val()
+
+
 
     let chk = confirm('삭제하시겠습니까?')
     if(chk == true){

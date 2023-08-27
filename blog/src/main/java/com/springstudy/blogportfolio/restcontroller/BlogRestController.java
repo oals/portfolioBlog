@@ -49,6 +49,10 @@ public class BlogRestController {
 
         //블로그 주인인지 검사
         //블로그 주인 일떄만 수정 삭제 버튼 보이게 변경
+        log.info("articleNo:"  + articleNo);
+        log.info("blogNo : " + blogNo);
+        log.info("categorynAME : " + categoryName);
+
 
         log.info("삭제시 전달된 카테고리 이름" + categoryName);
         blogSettingService.update_CategoryCount(blogNo,categoryName,false);
@@ -56,7 +60,8 @@ public class BlogRestController {
 
         //boardimage 테이블의 데이터 삭제
 
-        log.info("블로그 글 삭제 접근");
+        log.info("블로그 글 삭제 접근" + articleNo);
+
         userBoardService.BoardDelete(articleNo);
 
 

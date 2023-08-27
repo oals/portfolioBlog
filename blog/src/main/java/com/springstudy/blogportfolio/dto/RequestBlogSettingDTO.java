@@ -3,9 +3,11 @@ package com.springstudy.blogportfolio.dto;
 import com.springstudy.blogportfolio.entity.BlogSetting;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class RequestBlogSettingDTO {
 
 

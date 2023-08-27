@@ -67,6 +67,7 @@
 
 document.execCommand('defaultParagraphSeparator', false, 'p');
 
+
     const dataTransfer = new DataTransfer();
     var sel_files = []
     var Uuid = ''
@@ -100,7 +101,7 @@ document.execCommand('defaultParagraphSeparator', false, 'p');
 
             var reader = new FileReader();
             reader.onload = function(e){
-                var img_html = "<img name='contentImg' src=\"" + e.target.result + "\" />"
+                var img_html = "<img width='350px' name='contentImg' src=\"" + e.target.result + "\" />"
                 $("#blogContent").append(img_html)  //#content 영역의 마지막 요소/데이터에 append
             }
             reader.readAsDataURL(f)
@@ -141,6 +142,7 @@ $('#saveContent').click(function(e){
     let count = 0
 
 
+
     if($('#title')[0].value.length == 0){
 
         e.preventDefault()
@@ -149,14 +151,21 @@ $('#saveContent').click(function(e){
     }
 
 
+    console.log(content)
 
-
-
+    if(content.length != 0 ){
         if(content[0].localName != 'img'){
-           str[count] = text[0].childNodes[0].data
-         count++
+            str[count] = text[0].childNodes[0].data
+            count++
 
         }
+
+    }else{
+
+        str[count] = content.prevObject[0].innerHTML
+        count++
+    }
+
 
     for(let i = 0  ; i < content.length; i++){
 
@@ -172,6 +181,7 @@ $('#saveContent').click(function(e){
             console.log('error')
         }
     }
+
 
     $('#content').val(str)
 

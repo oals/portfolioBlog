@@ -186,7 +186,7 @@
 
                                     <li class="list-group-item text-center">
                                         <div class="">
-                                            <a th:href="@{/findEmailPage}"  class="card-link hover" style=" color:black;text-decoration-line:none;">아이디 찾기</a>
+                                            <a th:href="@{/findEmailPage}"  class="card-link hover" style=" color:black;text-decoration-line:none;">이메일 찾기</a>
                                             <a th:href="@{/findPwPage}"  class="card-link hover" style=" color:black;text-decoration-line:none;">비밀번호 찾기</a>
 
                                         </div>
@@ -244,7 +244,7 @@
 
                                                         <div class="col-10 px-3">
                                                             <a th:href="@{/Blog(userNickName=${list.userNickName})}" style=" color:black;" class="hover"> 닉네임 : [[${list.userNickName}]] </a><br>
-                                                            총 조회수 : [[${list.total}]]<br>
+                                                            총 방문자 수 : [[${list.total}]]<br>
                                                         </div>
                                                     </div>
                                                 </li>
@@ -571,7 +571,7 @@ $(document).on('click','.Boardpaging' ,function(e){
 <!--                        +"닉네임 :" + data.data.content[i].userNickName-->
 <!--                    +"</a>"-->
 <!--                    +"<br>"-->
-<!--                       + "총 조회수 :" + data.data.content[i].total-->
+<!--                       + "총 방문자 수 :" + data.data.content[i].total-->
 <!--                    +"</div>"-->
 
 <!--                    +"</div>"-->
@@ -671,7 +671,7 @@ $(document).on('click','.paging' ,function(e){
 
 
                                 str2 +="<br>"
-                                   + "총 조회수 : " + data.list[i].total
+                                   + "총 방문자 수 : " + data.list[i].total
                         +"</div>"
                     +"</div>"
 

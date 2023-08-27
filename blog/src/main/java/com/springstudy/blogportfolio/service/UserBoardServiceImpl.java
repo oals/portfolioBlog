@@ -126,21 +126,6 @@ public class UserBoardServiceImpl implements UserBoardService{
             userCommentRepository.save(parentComment);
 
 
-
-//            log.info("대댓글 조회 테스트");
-//
-//           UserComment userComment1 = userCommentRepository.findById(1l).orElseThrow();
-//
-//
-//           List<UserComment> list = userComment1.getChildComment();
-//           list.forEach(x -> log.info(x.getComment()));
-//
-//
-//            log.info(list.get(0).getComment());
-//            log.info(list.get(0).getChildComment().get(0).getComment());
-//            log.info(list.get(0).getChildComment().get(0).getChildComment().get(0).getComment());
-//
-
         }
 
 
@@ -158,7 +143,6 @@ public class UserBoardServiceImpl implements UserBoardService{
         userBoard.setWriteDate(LocalDateTime.now().toLocalDate());
 
         userBoardRepository.save(userBoard);
-        log.info("엔티티 먼저 만들기 : " + userBoard.getArticleNo());
 
         UserBoardDTO userBoardDTO1 = modelMapper.map(userBoard,UserBoardDTO.class);
 
@@ -167,20 +151,12 @@ public class UserBoardServiceImpl implements UserBoardService{
 
 
     @Override
-    public int Get_ArticleNo(Long blogNo) {
+    public int Get_ArticleNo(Long blogNo) {  //테스트
 
         //개시글 개수 반환하는 레포지토리 생성
         String result = userBoardRepository.findByArticleCount();
 
-//
-//        UserBoardSeq result2 = userBoardSeqRepository.findById(blogNo).orElseThrow();
-//
-//        int articleNo = result2.getNextNo();
-//
-//        log.info("새 블로그 글 폴더 생성 : " + (articleNo) + "번 글 폴더 생성 ");
-//
-//        result2.setNextNo(result2.getNextNo() + 1);
-//        userBoardSeqRepository.save(result2);
+
 
         return 1;
     }
