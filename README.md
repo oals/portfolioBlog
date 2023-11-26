@@ -86,24 +86,12 @@ gif파일 추가
  <summary> 블로그 포스팅 플로우 차트
  
  </summary> 
-
+  <img src='https://github.com/oals/portfolioLibrary/assets/136543676/c74a46d8-b260-403f-a9f0-9dcefa48fc71'>
 </details>
 
 <BR>
 <BR>
 
-
-
-
-![개인 프로젝트 BLOG 포스팅 페이지5](https://github.com/oals/portfolioBlog/assets/136543676/fba1a4b5-115f-4cfa-ba3d-e431accaaca8)
-
-<BR>
-<BR>
-<UL>
-  <LI> C 드라이브에 지정된 폴더가 없으면 생성하도록 구현했습니다. </LI>
-</UL>
-<BR>
-<BR>
 
 
 
