@@ -371,6 +371,7 @@ public class UserBoardServiceImpl implements UserBoardService{
                         qUserBoard.content,
                         qUserBoard.writeDate))
                 .from(qUserBoard)
+                .where(builder)
                 .join(qBlogSetting)
                 .on(qBlogSetting.blogNo.eq(qUserBoard.blogSetting.blogNo))
                 .join(qUserInfo)
