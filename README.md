@@ -49,6 +49,103 @@
 <img src='https://github.com/oals/portfolioLibrary/assets/136543676/b2af51d4-3574-403d-acd2-42df754a7476'>
 </details>
 
+<details>
+ <summary> 메인 페이지 카테고리 Service 코드
+ 
+ </summary> 
+
+
+         public PageResponseDTO<TopicBoardDTO> GetTopic_Board(PageRequestDTO pageRequestDTO,String topic) {
+
+        Pageable pageable = pageRequestDTO.getPageable();
+
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QUserBoard qUserBoard = QUserBoard.userBoard;
+        QBlogSetting qBlogSetting = QBlogSetting.blogSetting;
+        QUserInfo qUserInfo = QUserInfo.userInfo;
+        QBoardImage qBoardImage = QBoardImage.boardImage;
+
+        BooleanBuilder builder = new BooleanBuilder();
+
+        if(topic.equals("all")){  //전체 카테고리 선택 시
+            builder.and(qUserBoard.blogSetting.blogTopic.ne("default"));
+        }else{ //특정 카테고리 선택 시
+            builder.and(qUserBoard.blogSetting.blogTopic.eq(topic));
+        }
+
+        List<TopicBoardDTO> list = queryFactory.select(Projections.bean(TopicBoardDTO.class,
+                        qUserInfo.userEmail,
+                        qUserInfo.userNickName,
+                        qBlogSetting.profileImagePath,
+                        qUserBoard.Thumbnail.imagePath,
+                        qUserBoard.title,
+                        qUserBoard.content,
+                        qUserBoard.writeDate))
+                .from(qUserBoard)
+                .where(builder)
+                .join(qBlogSetting)
+                .on(qBlogSetting.blogNo.eq(qUserBoard.blogSetting.blogNo))
+                .join(qUserInfo)
+                .on(qUserInfo.userEmail.eq(qBlogSetting.userInfo.userEmail))
+                .offset(pageable.getOffset())   //N 번부터 시작
+                .limit(pageable.getPageSize()) //조회 갯수
+                .orderBy(qUserBoard.writeDate.desc()).fetch();
+
+
+        for(int i = 0; i< list.size(); i++){   //글 db 구조 변경시 삭제
+
+            String[] strArr = list.get(i).getContent().split(",");
+            //텍스트와 이미지 변환 작업
+            for(int j =0; j < (strArr.length); j++){
+                if(strArr[j].contains("image")){
+                    strArr[j] = " ";
+                }
+                if(strArr[j].contains("<br>")){
+                    strArr[j] = " ";
+                }
+                if(strArr[j].contains(",")){
+                    strArr[j] = " ";
+                }
+            }
+
+            String str = String.join(" ",strArr);
+
+            //글 미리보기 텍스트 변환 작업
+            if(str.length() < 100){
+                list.get(i).setContent(str);
+
+            }else{
+                list.get(i).setContent(str.substring(0,100) + ".....");
+            }
+
+
+        }
+
+
+        Long count = queryFactory
+                .select(qUserBoard.count())
+                .from(qUserBoard)
+                .where(builder.and(qUserBoard.Thumbnail.isNotNull()))
+                .fetchOne();
+
+
+        return PageResponseDTO.<TopicBoardDTO>widthAll()
+                .pageRequestDTO(pageRequestDTO)
+                .list(list)
+                .total(Integer.parseInt(count.toString()))
+                .build();
+
+
+    }
+
+
+
+
+ 
+</details>
+
+
+
 <br>
 <br>
 
@@ -89,6 +186,139 @@ gif파일 추가
   <img src='https://github.com/oals/portfolioLibrary/assets/136543676/c74a46d8-b260-403f-a9f0-9dcefa48fc71'>
 </details>
 
+
+<details>
+ <summary> 포스팅 Controller 코드
+ 
+ </summary> 
+
+
+
+          public ModelAndView myBlogInsert(Model model,Long blogNo,String userNickName,
+                                     UserBoardDTO userBoardDTO,
+                                     @RequestPart List<MultipartFile> multipartFileList) throws Exception {
+
+        String Content = userBoardDTO.getContent();
+        BoardImageDTO boardImageDTO = null;
+
+        //테이블 먼저 생성 후 articleNo 가져오기
+        UserBoardDTO createUserBoardDTO = userBoardService.create_UserBoard(userBoardDTO);
+        Long articleNo = createUserBoardDTO.getArticleNo();
+
+        List<String> imagePathList = new ArrayList<>();  //이미지 저장소
+        
+
+        if(multipartFileList != null) {   //해당 글 내용에 이미지가 있으면
+
+            //이미지 저장 폴더 경로
+            String path = itemImgLocation + "/blogBoardImage/" + blogNo + "/" + articleNo;  // + 글 번호 추가 필요
+
+            //글 번호 폴더만들기
+            createDirectoryService.createBlogContentDirectory(blogNo, articleNo);    
+
+            //이미지 파일 업로드
+            for(int i = 0; i <  multipartFileList.size(); i++) {
+
+                //이미지 파일 업로드
+                if(!multipartFileList.get(i).getOriginalFilename().isEmpty()){
+                    String fileName = fileService.uploadFile(path, multipartFileList.get(i).getOriginalFilename(), multipartFileList.get(i).getBytes());
+
+                    if(Content.contains(multipartFileList.get(i).getOriginalFilename())){
+                        String imagePath = "/images/blogBoardImage/" + blogNo + "/" + articleNo + "/" + fileName;
+
+                        //List에 이미지 경로들 모음
+                        imagePathList.add(imagePath);
+
+                        //반복문 종료 후 서비스 호출 -> 반복문으로 엔티티 여러개 생성
+
+                        Content =  Content.replace(multipartFileList.get(i).getOriginalFilename(), imagePath);
+                        //여기 데이터를 boardImage 테이블에 저장
+
+                    }
+                }
+            }
+        }
+
+
+        //content내용 알고리즘 생성 / img 문자열 -> 이미지 경로
+        BlogSettingDTO blogSettingDTO = blogSettingService.GetBlog_SettingEntity(blogNo);
+
+
+        //알고리즘을 거친 블로그 컨텐츠 문자열로 다시 저장
+        createUserBoardDTO.setContent(Content);
+
+
+
+        if(!imagePathList.isEmpty()) {
+            //작성 게시글의 이미지 저장 테이블에 이미지 저장
+            boardImageDTO = userBoardService.UpdateBoard_Image(createUserBoardDTO, imagePathList);
+        }
+
+        //db에 글 저장
+        userBoardService.Insert_UserBoard(blogSettingDTO,createUserBoardDTO,boardImageDTO);
+
+
+
+        //카테고리의 count 값 + 1
+        blogSettingService.update_CategoryCount(blogNo,userBoardDTO.getCategory(),true);
+
+        
+        
+        //컨트롤러 -> 컨트롤러 이동 코드
+
+        ModelAndView MAV = new ModelAndView();
+        MAV.setViewName("redirect:/Blog");
+        MAV.addObject("userNickName",userNickName);
+
+        return MAV;
+    }
+
+
+
+
+
+
+ 
+</details>
+
+
+<details>
+ <summary> 포스팅 Service 코드
+ 
+ </summary> 
+
+
+            public void Insert_UserBoard(BlogSettingDTO blogSettingDTO, UserBoardDTO userBoardDTO,BoardImageDTO boardImageDTO) {
+
+        BlogSetting blogSetting = modelMapper.map(blogSettingDTO,BlogSetting.class);
+        UserBoard userBoard = modelMapper.map(userBoardDTO,UserBoard.class);
+        BoardImage boardImage = null;
+
+        if(boardImageDTO != null) {
+             boardImage = modelMapper.map(boardImageDTO, BoardImage.class);
+        }
+
+
+        userBoard.setBlogSetting(blogSetting);       
+        userBoard.setTitle(userBoardDTO.getTitle());
+        userBoard.setContent(userBoardDTO.getContent());
+        userBoard.setThumbnail(boardImage == null ? null : boardImage);
+        userBoard.setCategory(userBoardDTO.getCategory());
+        userBoard.getLike();
+        userBoard.getView();
+        userBoard.setWriteDate(LocalDateTime.now().toLocalDate());
+
+        userBoardRepository.save(userBoard);
+
+    }
+
+
+
+
+ 
+</details>
+
+
 <BR>
 <BR>
 
@@ -112,6 +342,139 @@ gif파일 추가
  </summary> 
   <img src='https://github.com/oals/portfolioLibrary/assets/136543676/77b9eb63-b935-4f29-9f07-1b31c95e0cf6'>
 </details>
+
+
+<details>
+ <summary> 댓글 & 대댓글 재귀 함수 자바 스크립트 코드
+ 
+ </summary> 
+
+
+
+              function createChild(comments, padding = 1) {
+                const commentString = [];
+                let str = ''
+                for(let i = 0; i < comments.length; i++) {
+
+                          str = "<div class='d-flex align-items-start flex-column mb-1' style='padding-left :" + (padding * 40)  + "px'>"
+                          + "<div class='col-3 mt-1'>"
+                                + "ㄴ " + "<a href='/Blog?userNickName=" + comments[i].userNickName + "' >"
+                                    + comments[i].userNickName + "님"
+                                + "</a>"
+                            +"</div>"
+
+                            +"<div class='col-6'>"
+                               +  comments[i].comment
+                            if(comments[i].comment != '삭제된 댓글입니다.'){
+                               str += "<button class='badge bg-secondary m-1' data-bs-toggle='collapse'" + "data-bs-target='#collapseOne" + comments[i].commentNo  + "'aria-expanded='true'" +  "aria-controls='collapseOne" + comments[i].commentNo  + "'>답글</button>"
+
+                                if(userNickName == comments[i].userNickName){
+                                 str += "<button class='badge bg-secondary m-1 delComment'  data-value='"+ comments[i].commentNo   + "' >삭제</button>"
+                                    }
+                            }
+
+                            str += "</div>"
+
+                            +"<div class='col-3'>"
+                                + comments[i].writeDate
+                            +"</div>"
+                       + "</div>"
+
+                            +"<div id='collapseOne"+ comments[i].commentNo   + "'class='accordion-collapse collapse' aria-labelledby='headingOne' data-bs-      parent='#accordionExample'>"
+                               +"<div class='accordion-body'>"
+                              + "ㄴ <input type='text' class='w-75' style='border-left-width:0;border-right-width:0;border-top-width:0;border-bottom-width:0.5;'>"
+
+
+                              +"<button type='button' class='replyBtn badge bg-secondary m-1' value ='" +  comments[i].commentNo + "'> 작성 </button>"
+
+                                +"</div>"
+
+
+
+                               +"</div>"
+
+                       +"</div>"
+
+                    commentString.push(str);
+
+
+                  if (comments[i].childComment.length > 0) {
+                    commentString.push(createChild(comments[i].childComment, padding + 1));
+                  }
+
+                }
+
+                console.log(commentString)
+                return commentString.join('')
+              }
+
+        
+
+
+
+
+
+</details>
+
+
+
+<details>
+ <summary> 댓글 작성 Service 코드
+ 
+ </summary> 
+
+
+
+          public void Insert_UserComment(Map<String,Object> map) {
+
+        BlogSetting blogSetting = modelMapper.map(map.get("blogSettingDTO"),BlogSetting.class);
+        UserBoard userBoard = modelMapper.map(map.get("userBoardDTO"),UserBoard.class);
+
+        UserComment parentComment;
+
+        if(map.get("parentCommentDTO") == null){ //부모 댓글이 없을 때
+            parentComment = null;
+
+            UserComment userComment = new UserComment();
+            userComment.setBlogSetting(blogSetting);
+            userComment.setUserBoard(userBoard);
+            userComment.setUserNickName(map.get("userNickName").toString());
+            userComment.setComment(map.get("comment").toString());
+            userComment.setParentComment(parentComment); //부모 댓글 null 처리
+            userComment.setWriteDate(LocalDateTime.now().toLocalDate());
+
+            userCommentRepository.save(userComment);
+
+        }else{                                  //부모 댓글이 있을 때
+            parentComment = modelMapper.map(map.get("parentCommentDTO"),UserComment.class);
+
+            UserComment userComment = new UserComment();
+            userComment.setBlogSetting(blogSetting);
+            userComment.setUserBoard(userBoard);
+            userComment.setUserNickName(map.get("userNickName").toString());
+            userComment.setComment(map.get("comment").toString());
+            userComment.setParentComment(parentComment);
+            userComment.setWriteDate(LocalDateTime.now().toLocalDate());
+
+            userCommentRepository.save(userComment);
+
+            parentComment.addChildComment(userComment);
+            userCommentRepository.save(parentComment);
+
+        }
+
+
+    }
+
+
+
+
+
+</details>
+
+
+
+
 <BR>
 <BR>
 
@@ -173,6 +536,43 @@ gif파일 추가
 </details>
 <BR>
 
+
+
+<details>
+ <summary> 블로그 방문자수 집계 Service 코드
+ 
+ </summary> 
+
+
+
+            public void GetVisit_Info(Long blogNo) {
+
+        Visit visit = visitRepository.findByBlogsetting_BlogNo(blogNo);
+
+        //블로그의 투데이 / 토탈  + 1
+        visit.updateVisit(visit.getToday(), visit.getTotal());
+
+
+         LocalDateTime date = LocalDateTime.now();
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        int dayOfWeekNumber = dayOfWeek.getValue();
+
+            //하루가 지났을 경우 초기화
+        if (dayOfWeekNumber != visit.getWeek()) {
+            visit.updateVisit(0, visit.getTotal());
+            visit.setWeek(dayOfWeekNumber);
+        }
+
+
+        visitRepository.save(visit);
+
+    }
+
+
+
+
+ 
+</details>
 
 
 
