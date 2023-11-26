@@ -398,7 +398,7 @@ gif파일 추가
                     commentString.push(str);
 
 
-                  if (comments[i].childComment.length > 0) {
+                  if (comments[i].childComment.length > 0) { //재귀 함수 호출
                     commentString.push(createChild(comments[i].childComment, padding + 1));
                   }
 
