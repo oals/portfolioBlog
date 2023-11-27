@@ -174,7 +174,8 @@
 <H3>포스팅 </H3>
 <BR>
 
-gif파일 추가
+![포스팅-작성](https://github.com/oals/portfolioBlog/assets/136543676/841cde84-7922-4ed5-a92d-16dabc93c227)
+
 
 <BR>
 <BR>
