@@ -33,6 +33,534 @@
 
 # 핵심 기능 및 페이지 소개
 
+<details>
+ <summary> UserInfo Entity
+ 
+ </summary> 
+
+
+
+
+
+          
+    @Log4j2
+    @Setter
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Table(name = "userinfo")
+    @Builder
+    @Entity
+    public class UserInfo {
+
+    @Id
+    @Column(nullable = false,length = 200)
+    private String userEmail;  //이메일
+
+    @Column(nullable = false)
+    private String userPw; //비밀번호
+
+    @Column(nullable = false,length = 50)
+    private String userName; //이름
+
+    @Column(nullable = true,length = 50)
+    private String userNickName; //닉네임
+
+    @Column(nullable = false,length = 300)
+    private String address; //주소
+
+    @Column(nullable = false,length = 50)
+    private String phone; //전화번호
+
+    @Column(nullable = false)
+    private String joinDate; //가입날짜
+
+    @Column(nullable = true)
+    private int followCount; //팔로워 수
+
+    @Column(nullable = true)
+    private int followingCount; //팔로잉 수
+    @Enumerated(EnumType.STRING)
+    private Role role;  //권한 설정
+
+
+    public static UserInfo createMember(UserInfoDTO userInfoDTO, PasswordEncoder passwordEncoder){
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserEmail(userInfoDTO.getUserEmail());
+        userInfo.setUserName(userInfoDTO.getUserName());
+        userInfo.setUserNickName(userInfoDTO.getUserNickName());
+        userInfo.setAddress(userInfoDTO.getAddress());
+        userInfo.setPhone(userInfoDTO.getPhone());
+        userInfo.setJoinDate(userInfoDTO.getJoinDate());
+        userInfo.setFollowCount(userInfoDTO.getFollowCount());
+        userInfo.setFollowingCount(userInfoDTO.getFollowingCount());
+        userInfo.setRole(Role.USER);
+
+
+        // 암호화
+        String password = passwordEncoder.encode(userInfoDTO.getUserPw());
+        userInfo.setUserPw(password);
+
+        return userInfo;
+    }
+
+    public void Update_NickName(String userNickName){
+
+        this.userNickName = userNickName;
+    }
+
+
+
+    }
+          
+
+
+
+
+
+
+
+
+</details>
+
+<details>
+ <summary> UserBoard Entity
+ 
+ </summary> 
+
+
+
+
+    @Entity
+    @Getter
+    @Setter
+    @Table(name="userboard")
+    public class UserBoard {
+
+    @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private Long articleNo; 
+
+    @ManyToOne(fetch = FetchType.LAZY)    //확인 필요
+    @JoinColumn(name="blogsetting_blog_no")
+    private BlogSetting blogSetting; //블로그 정보
+
+
+    @OneToMany(mappedBy = "userBoard",cascade = CascadeType.ALL)
+    private List<UserComment> userComment = new ArrayList<UserComment>(); //댓글 
+
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private BoardImage Thumbnail;   //썸네일 이미지 
+
+
+
+    @Column(nullable = false)
+    private String category;    //해당 포스트의 카테고리 명
+
+    @Column(nullable = false)
+    private String title;   //제목
+
+    @Column(nullable = false,length = 5000)
+    private String content; //내용
+
+    @Min(value=0)
+    @Column(nullable = false)
+    private int view;   //조회수
+
+    @Min(value=0)
+    @Column(nullable = false,name = "board_Like")
+    private int like;   //좋아요 수
+
+    @Column(nullable = false)
+    private LocalDate writeDate;    //작성일
+
+
+    public void updateLike(){
+        this.like += 1;
+
+    }
+
+
+
+
+    }
+
+
+
+
+  
+
+
+
+
+
+</details>
+
+
+<details>
+ <summary> UserComment Entity
+ 
+ </summary> 
+
+
+
+
+
+    @Entity
+    @Getter
+    @Setter
+    @Log4j2
+    public class UserComment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long commentNo;  
+
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="userboard_articleNo")
+    private UserBoard userBoard;    //댓글이 달린 포스트
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="blogsetting_blogNo")
+    private BlogSetting blogSetting;  //블로그 설정
+    
+
+    @Column(nullable = false,name="user_nick_name")
+    private String userNickName;    //댓글 작성자
+
+
+    @Column(nullable = false,name="comment")
+    private String comment; //댓글 내용
+
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="UserComment_commentNo")
+    private UserComment parentComment;       //부모 댓글
+
+
+    @OneToMany(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @JoinColumn(name="UserComment_commentNo")
+    private List<UserComment> childComment = new ArrayList<UserComment>();  //자식 댓글  
+
+
+
+    @Column(nullable = false)
+    private LocalDate writeDate;    //댓글 작성일
+
+
+
+    public void addChildComment(UserComment userComment){
+
+        this.childComment.add(userComment);
+
+    }
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+</details>
+
+
+<details>
+ <summary> Category Entity
+ 
+ </summary> 
+
+
+
+
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Table(name="category")
+    @Log4j2
+    @Entity
+    public class Category {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long categoryNo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="blogsetting_blog_no")
+    private BlogSetting blogSetting;    //블로그 정보
+
+
+    @OneToMany(mappedBy = "category" ,cascade = CascadeType.PERSIST)
+    private List<CategoryItem> categoryItem = new ArrayList<CategoryItem>();    //카테고리 정보
+
+
+
+    public void addCategory(List<CategoryItem> categoryItem){
+
+        for(int i = 0; i< categoryItem.size(); i++) {
+            this.categoryItem.add(categoryItem.get(i));
+        }
+    }
+
+
+    }
+
+
+
+
+
+
+
+
+
+</details>
+
+
+<details>
+ <summary> CategoryItem Entity
+ 
+ </summary> 
+
+
+
+
+
+    @Entity
+    @Getter
+    @Setter
+    @Table(name="categoryItem")
+    public class CategoryItem {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name="category_name")
+    private String CategoryName; // 카테고리 명
+
+    @Min(value = 0)
+    @Column(name="category_count")
+    private int categoryCount;  //카테고리의 글 개수
+
+    @ManyToOne
+    private Category category;
+
+
+     }
+
+
+
+
+
+
+
+
+
+</details>
+
+
+<details>
+ <summary> BlogSetting Entity
+ 
+ </summary> 
+
+
+
+
+     @Entity
+     @Getter
+     @AllArgsConstructor
+     @NoArgsConstructor
+     @Table(name="blogsetting")
+     @Builder
+     public class BlogSetting {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long blogNo;
+
+
+    @OneToOne(fetch = FetchType.LAZY)    
+    @JoinColumn(name = "userinfo_userEmail")
+    private UserInfo userInfo;  //블로그 주인
+
+    @Column(nullable = true)
+    private String blogTopic;  //블로그 주제
+
+    @Column(nullable = true)
+    private String headerImagePath; //헤더 이미지
+
+    @Column(nullable = true)
+    private String bodyImagePath; //바디 이미지
+
+    @Column(nullable = true)
+    private String profileInfo; //프로필 소개글
+
+    @Column(nullable = true)
+    private String profileImagePath; //프로필 이미지
+
+    @Column(nullable = true)
+    private boolean privateChk; //비공개 여부
+
+    @Column(nullable = true)
+    private boolean writePermission; //댓글 작성 여부
+
+
+    public void update_profile(BlogSettingDTO blogSettingDTO){
+
+
+        this.profileInfo = blogSettingDTO.getProfileInfo();
+        this.blogTopic = blogSettingDTO.getBlogTopic();
+        this.privateChk = blogSettingDTO.isPrivateChk();
+        this.headerImagePath = blogSettingDTO.getHeaderImagePath();
+        this.bodyImagePath =  blogSettingDTO.getBodyImagePath();
+        this.profileImagePath = blogSettingDTO.getProfileImagepath();
+    }
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+</details>
+
+
+<details>
+ <summary> BlogSettingImage Entity
+ 
+ </summary> 
+
+
+
+
+
+    @Entity
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class BlogSettingImage {    
+
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long BlogImgNo;
+
+    @OneToOne(fetch = FetchType.LAZY)    
+    @JoinColumn(name="blogsetting_blog_no")
+    BlogSetting blogSetting; //블로그 정보
+
+    String PastHeaderImagePath;  //수정 전 헤더이미지 
+    String PastBodyImagePath; //수정 전 바디 이미지
+    String PastProfileImagePath; //수정 전 프로필 이미지
+
+    public void update_Image(BlogSettingImageDTO blogSettingImageDTO){
+        this.PastHeaderImagePath = blogSettingImageDTO.getPastHeaderImagePath();
+        this.PastBodyImagePath = blogSettingImageDTO.getPastBodyImagePath();
+        this.PastProfileImagePath = blogSettingImageDTO.getPastProfileImagePath();
+
+    }
+
+
+
+    }    
+
+
+
+
+
+
+
+
+</details>
+
+
+
+<details>
+ <summary> Visit Entity
+ 
+ </summary> 
+
+
+
+
+
+    @Getter
+    @ToString
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    @Entity
+    public class Visit {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long visitNo;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="blogsetting_blog_no")
+    private BlogSetting blogsetting; //블로그 정보
+
+    @Column(nullable = false)
+    private int today; //오늘의 방문자 수
+
+    @Column(nullable = false)
+    private int total; //총 방문자 수
+
+    @Column(nullable = false)
+    private int week; //오늘의 요일
+
+
+
+    public void updateVisit(int today,int total){
+
+        this.today = today + 1;
+        this.total = total + 1;
+
+
+
+    }
+
+
+    }
+
+
+
+
+
+
+
+
+
+</details>
+
+
+
+
+
+<hr>
 <H3>메인 페이지</H3>
 <BR>
 
