@@ -14,14 +14,14 @@
 
 
 # 사용기술
-![js](https://img.shields.io/badge/SpringBoot-6DB33F?style=for-the-badge&logo=JavaScript&logoColor=white)
-![js](https://img.shields.io/badge/Java-FF0000?style=for-the-badge&logo=JavaScript&logoColor=white)
-![js](https://img.shields.io/badge/IntelliJ-004088?style=for-the-badge&logo=JavaScript&logoColor=white)
-![js](https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=JavaScript&logoColor=white)
-![js](https://img.shields.io/badge/security-6DB33F?style=for-the-badge&logo=JavaScript&logoColor=white)
+![js](https://img.shields.io/badge/SpringBoot-6DB33F?style=for-the-badge&logo=SpringBoot&logoColor=white)
+![js](https://img.shields.io/badge/Java-FF0000?style=for-the-badge&logo=Java&logoColor=white)
+![js](https://img.shields.io/badge/IntelliJ-004088?style=for-the-badge&logo=IntelliJ&logoColor=white)
+![js](https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=MariaDB&logoColor=white)
+![js](https://img.shields.io/badge/security-6DB33F?style=for-the-badge&logo=security&logoColor=white)
 
-![js](https://img.shields.io/badge/jquery-0769AD?style=for-the-badge&logo=JavaScript&logoColor=white)
-![js](https://img.shields.io/badge/bootstrap-7952B3?style=for-the-badge&logo=JavaScript&logoColor=white)
+![js](https://img.shields.io/badge/jquery-0769AD?style=for-the-badge&logo=jquery&logoColor=white)
+![js](https://img.shields.io/badge/bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)
 ![js](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=JavaScript&logoColor=white)
 
 # E-R 다이어그램
